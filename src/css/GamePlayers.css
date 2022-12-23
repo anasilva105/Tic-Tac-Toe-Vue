@@ -1,0 +1,9 @@
+.containerPlayers {
+    text-align: center;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 25px;
+}
+
+.selectedPlayer {
+    font-weight: bold;
+}
