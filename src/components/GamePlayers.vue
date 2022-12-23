@@ -11,7 +11,6 @@ export default {
 };
 </script>
 <template>
-  <div>Players: {{ players }}</div>
   <div class="containerPlayers" v-for="player in players" :key="player.id">
     <p :class="player.is_active_player ? 'selectedPlayer' : ''">
       {{ player.name }}: {{ player.symbol }}

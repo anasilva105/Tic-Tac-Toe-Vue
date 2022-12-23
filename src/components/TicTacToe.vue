@@ -19,7 +19,6 @@ export default {
 
 <template>
   <h3 class="title">{{ title }}</h3>
-  <p>Active Player: {{ active_player }}</p>
   <game-panel>
     <template #game
       ><game-board
@@ -37,7 +36,7 @@ export default {
         :is_p2c="is_p2c"
         :is_new_game="is_new_game"
         @updatePlayerSymbol="getActivePlayer"
-        @updateComputerSymbol="getComputerSymbol"
+        @updateComputerSymbol="getAISymbol"
     /></template>
     <template #menu
       ><game-menu

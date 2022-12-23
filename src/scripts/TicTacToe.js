@@ -15,6 +15,7 @@ export default {
     is_p2c: false,
     ai_position: {},
     ai_symbol: "",
+    ai_waiting_time_ms: 1500,
     MAX_ROWS: 3,
     MAX_COLUMNS: 3,
     is_new_game: false,
@@ -24,7 +25,7 @@ export default {
     getActivePlayer(player) {
       this.active_player = player;
     },
-    getComputerSymbol(symbol) {
+    getAISymbol(symbol) {
       this.ai_symbol = symbol;
     },
     checkGameStatus(board) {
@@ -33,7 +34,6 @@ export default {
       }
       if (board && this.active_player) {
         const flat_board = board.flat();
-
         if (isBoardComplete(flat_board)) {
           this.is_game_over = true;
         } else if (isVictory(flat_board, this.active_player)) {
@@ -41,21 +41,24 @@ export default {
         } else {
           if (this.is_p2c) {
             if (this.active_player !== this.ai_symbol) {
-              this.active_player = "";
-              setTimeout(() => {
-                const { position } = minimax(flat_board, this.ai_symbol);
-                this.ai_position = {
-                  row: Math.floor(position / this.MAX_ROWS),
-                  column: Math.floor(position % this.MAX_COLUMNS),
-                  char: this.ai_symbol,
-                };
-              }, 1500);
-            } else {
-              this.active_player = "";
+              AIPlays(
+                flat_board,
+                {
+                  ai_symbol: this.ai_symbol,
+                  human_symbol: this.active_player,
+                  ai_waiting_time: this.ai_waiting_time_ms,
+                },
+                (position) => {
+                  this.ai_position = {
+                    row: Math.floor(position / this.MAX_ROWS),
+                    column: Math.floor(position % this.MAX_ROWS),
+                    char: this.ai_symbol,
+                  };
+                }
+              );
             }
-          } else {
-            this.active_player = "";
           }
+          this.active_player = "";
         }
       }
     },
@@ -87,13 +90,24 @@ function getEmptyPositions(board) {
     .filter((val) => val !== undefined);
 }
 
-function minimax(board, player) {
+function AIPlays(
+  board,
+  { ai_symbol, human_symbol, ai_waiting_time },
+  handleAIPosition
+) {
+  setTimeout(() => {
+    const { position } = minimax(board, ai_symbol, { human_symbol, ai_symbol });
+    handleAIPosition(position);
+  }, ai_waiting_time);
+}
+
+function minimax(board, player, symbols) {
   const emptyPositions = getEmptyPositions(board);
   let bestMove;
 
-  if (isVictory(board, player) && player === "X") {
+  if (isVictory(board, player) && player === symbols.human_symbol) {
     return { score: -10 };
-  } else if (isVictory(board, player) && player === "O") {
+  } else if (isVictory(board, player) && player === symbols.ai_symbol) {
     return { score: 10 };
   } else if (isBoardComplete(board)) {
     return { score: 0 };
@@ -102,12 +116,14 @@ function minimax(board, player) {
   const moves = emptyPositions.map((position) => {
     board[position] = player;
     const { score } =
-      player === "O" ? minimax(board, "X") : minimax(board, "O");
+      player === symbols.ai_symbol
+        ? minimax(board, symbols.human_symbol, symbols)
+        : minimax(board, symbols.ai_symbol, symbols);
     board[position] = "";
     return { position, score };
   });
 
-  if (player === "O") {
+  if (player === symbols.ai_symbol) {
     bestMove = moves.reduce(
       (max_index, val, i, arr) =>
         val.score > arr[max_index].score ? i : max_index,

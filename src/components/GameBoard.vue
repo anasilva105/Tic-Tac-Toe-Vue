@@ -11,8 +11,6 @@ export default {
 };
 </script>
 <template>
-    <div>{{ board }}</div>
-
   <table>
     <tr
       :class="rowIndex < board.length - 1 ? 'borderRow' : ''"
